@@ -5,16 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Micrositio interactivo para el 1er Foro Lasallista: Indivisa Manent. Simulación académica y debate social.">
     <title>1er Foro Lasallista: Indivisa Manent</title>
+
+    <link rel="canonical" href="https://alvarezgzx-lab.github.io/micrositiomesaredonda/">
+
+    <meta property="og:site_name" content="Foro Lasallista Indivisa Manent">
+    <meta property="og:title" content="1er Foro Lasallista: Indivisa Manent | Debate Interactivo">
+    <meta property="og:description" content="Participa en la simulación académica sobre Migración, Agua, Gentrificación y Derechos Humanos. Colegio Regiomontano Contry La Salle.">
     
-    <!-- Tailwind CSS (Estilos Utilitarios) -->
+    <meta property="og:image" content="https://alvarezgzx-lab.github.io/micrositiomesaredonda/preview.jpg">
+    <meta property="og:image:secure_url" content="https://alvarezgzx-lab.github.io/micrositiomesaredonda/preview.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Portada del Foro Indivisa Manent">
+
+    <meta property="og:url" content="https://alvarezgzx-lab.github.io/micrositiomesaredonda/">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="es_MX">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="1er Foro Lasallista: Indivisa Manent">
+    <meta name="twitter:description" content="Debate social y fraternidad: Un espacio interactivo para estudiantes de secundaria.">
+    <meta name="twitter:image" content="https://alvarezgzx-lab.github.io/micrositiomesaredonda/preview.jpg">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Tipografías Académicas y Modernas -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:ital,wght@0,300;0,400;0,700;1,400&family=Oswald:wght@400;600&display=swap" rel="stylesheet">
     
-    <!-- Iconografía -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
@@ -91,14 +110,12 @@
 </head>
 <body class="antialiased">
 
-    <!-- Marca de Agua de Fondo -->
     <div class="watermark-container no-print">
         <div class="watermark-text">1er Foro Lasallista • Indivisa Manent • Español II</div>
         <div class="watermark-text">Dialogo Social y Fraternidad • Colegio Regiomontano Contry</div>
         <div class="watermark-text">1er Foro Lasallista • Indivisa Manent • Español II</div>
     </div>
 
-    <!-- Barra de Navegación -->
     <nav class="bg-[#002f6c] text-white shadow-lg sticky top-0 z-50 no-print border-b-4 border-[#d4af37]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
@@ -117,11 +134,8 @@
         </div>
     </nav>
 
-    <!-- ================= VISTA 1: LOBBY (HOME) ================= -->
     <section id="home" class="view-section active relative z-10 no-print">
-        <!-- Hero Header -->
         <div class="bg-gradient-to-br from-[#002f6c] to-[#001b3d] text-white pt-20 pb-24 px-4 text-center rounded-b-[3rem] shadow-2xl relative overflow-hidden">
-            <!-- Patrón decorativo -->
             <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#d4af37 1px, transparent 1px); background-size: 30px 30px;"></div>
             
             <div class="relative z-10 max-w-4xl mx-auto">
@@ -140,7 +154,6 @@
             </div>
         </div>
 
-        <!-- Grid de Mesas -->
         <div class="max-w-7xl mx-auto -mt-16 px-6 pb-20 relative z-20">
             <div class="flex items-center justify-center mb-8">
                 <h2 class="bg-white px-8 py-3 rounded-full shadow-lg text-2xl font-bold text-[#002f6c] border border-gray-100">
@@ -149,18 +162,13 @@
             </div>
             
             <div id="mesas-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Se llena dinámicamente con JS -->
-            </div>
+                </div>
         </div>
     </section>
 
-    <!-- ================= VISTA 2: DETALLE DE MESA ================= -->
     <section id="mesa-detail" class="view-section relative z-10 pb-20 no-print">
-        <!-- Header Inmersivo -->
         <div id="mesa-header" class="relative py-20 px-6 text-center text-white transition-all duration-700 bg-cover bg-center bg-no-repeat shadow-inner">
-            <div class="absolute inset-0 bg-[#002f6c]/80 backdrop-blur-[2px]"></div> <!-- Overlay -->
-            
-            <div class="relative z-10 max-w-5xl mx-auto">
+            <div class="absolute inset-0 bg-[#002f6c]/80 backdrop-blur-[2px]"></div> <div class="relative z-10 max-w-5xl mx-auto">
                 <div class="flex justify-between items-start mb-8">
                     <button onclick="navigateTo('home')" class="bg-white/10 hover:bg-white/20 backdrop-blur px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-wide transition flex items-center border border-white/30">
                         <i class="fa-solid fa-arrow-left mr-2"></i> Lobby
@@ -177,10 +185,8 @@
 
         <div class="max-w-6xl mx-auto -mt-12 px-4 relative z-20 space-y-12">
             
-            <!-- Introducción y One Pager (Layout Grid) -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 
-                <!-- Columna Izquierda: Contexto -->
                 <div class="lg:col-span-7 space-y-8">
                     <div class="bg-white p-8 rounded-2xl shadow-xl border-t-8 border-[#002f6c]">
                         <div class="flex items-center mb-6 pb-4 border-b border-gray-100">
@@ -190,11 +196,9 @@
                             <h4 class="text-2xl font-bold text-gray-800">Contexto del Conflicto</h4>
                         </div>
                         <div id="mesa-intro-text" class="text-gray-600 leading-relaxed text-lg space-y-4 font-light text-justify">
-                            <!-- JS -->
-                        </div>
+                            </div>
                     </div>
 
-                    <!-- Call to Action -->
                     <div class="bg-gradient-to-r from-[#002f6c] to-[#1e40af] p-8 rounded-2xl shadow-xl text-center text-white relative overflow-hidden group cursor-pointer transition transform hover:scale-[1.01]" onclick="showRolesGallery()">
                         <div class="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-white opacity-5 rounded-full group-hover:scale-150 transition duration-700"></div>
                         
@@ -207,7 +211,6 @@
                     </div>
                 </div>
 
-                <!-- Columna Derecha: One Pager -->
                 <div class="lg:col-span-5">
                     <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200 h-full flex flex-col">
                         <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
@@ -216,19 +219,16 @@
                         </div>
                         
                         <div class="p-6 flex-grow flex flex-col gap-6" id="one-pager-container">
-                            <!-- Pregunta -->
                             <div class="bg-blue-50/50 p-5 rounded-xl border-l-4" id="op-question-box">
                                 <p class="text-xs font-bold uppercase text-[#002f6c]/60 mb-2">Pregunta Detonante</p>
                                 <p class="text-lg font-serif italic text-gray-800 leading-snug" id="op-question">...</p>
                             </div>
 
-                            <!-- Estadísticas -->
                             <div class="space-y-3">
                                 <p class="text-xs font-bold uppercase text-gray-400">Datos Duros (Nuevo León)</p>
                                 <div id="op-stats" class="grid grid-cols-1 gap-3"></div>
                             </div>
 
-                            <!-- Dilema -->
                             <div class="mt-auto pt-6 border-t border-dashed border-gray-200 text-center">
                                 <span class="bg-gray-100 text-gray-500 px-2 py-1 rounded text-[10px] font-bold uppercase">Dilema Ético</span>
                                 <p class="text-xl font-bold mt-2" id="op-dilemma">...</p>
@@ -242,9 +242,7 @@
         </div>
     </section>
 
-    <!-- ================= VISTA 3: GALERÍA DE ROLES ================= -->
     <section id="roles-gallery" class="view-section relative z-10 pb-20 no-print bg-gray-100 min-h-screen">
-        <!-- Sub-Nav Sticky -->
         <div class="bg-white/90 backdrop-blur border-b border-gray-200 sticky top-16 z-30 px-6 py-4">
             <div class="max-w-7xl mx-auto flex justify-between items-center">
                 <button onclick="backToMesa()" class="text-gray-500 hover:text-[#002f6c] flex items-center text-sm font-bold uppercase transition">
@@ -267,16 +265,13 @@
             </div>
 
             <div id="roles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <!-- Inyectado por JS -->
-            </div>
+                </div>
         </div>
     </section>
 
-    <!-- ================= MODAL DE EXPEDIENTE (LIGHTBOX) ================= -->
     <div id="role-modal" class="modal-overlay">
         <div class="modal-container animate-slide-up">
             
-            <!-- Barra de Herramientas del Modal -->
             <div class="sticky top-0 z-50 bg-white border-b px-6 py-3 flex justify-between items-center shadow-sm no-print">
                 <div class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center">
                     <i class="fa-solid fa-lock mr-2 text-[#d4af37]"></i> Confidencial
@@ -292,7 +287,6 @@
             </div>
             
             <div id="modal-body" class="bg-white">
-                <!-- Header del Expediente -->
                 <div class="p-8 md:p-10 border-b-4 border-[#d4af37] bg-gray-50 relative overflow-hidden">
                     <div class="absolute top-0 right-0 p-10 opacity-5 text-9xl transform rotate-12 text-[#002f6c] pointer-events-none">
                         <i class="fa-solid fa-fingerprint"></i>
@@ -307,10 +301,8 @@
                     </div>
                 </div>
 
-                <!-- Contenido del Expediente -->
                 <div class="p-8 md:p-10 grid grid-cols-1 lg:grid-cols-3 gap-10">
                     
-                    <!-- Columna Principal: Historia -->
                     <div class="lg:col-span-2 space-y-8">
                         <div>
                             <h4 class="flex items-center text-[#002f6c] font-bold text-lg mb-4 border-b border-gray-200 pb-2">
@@ -325,20 +317,17 @@
                             </h4>
                             <p class="text-xs text-gray-500 mb-4 italic pl-1">Investiga estas preguntas para fundamentar tu postura asertiva con datos reales.</p>
                             <ul id="m-role-research" class="space-y-4">
-                                <!-- Lista inyectada -->
-                            </ul>
+                                </ul>
                         </div>
                     </div>
 
-                    <!-- Sidebar: Conceptos Clave -->
                     <div class="lg:col-span-1">
                         <div class="bg-blue-50/50 p-6 rounded-xl border border-blue-100 sticky top-4">
                             <h4 class="text-[#002f6c] font-bold text-sm uppercase tracking-wide mb-4">
                                 <i class="fa-solid fa-tags mr-2"></i> Palabras Clave
                             </h4>
                             <div id="m-role-keywords" class="flex flex-wrap gap-2 mb-6">
-                                <!-- Tags -->
-                            </div>
+                                </div>
                             
                             <div class="bg-yellow-50 p-4 rounded border border-yellow-200 text-xs text-yellow-800 leading-relaxed">
                                 <i class="fa-solid fa-lightbulb mr-1 text-[#d4af37]"></i> 
@@ -349,7 +338,6 @@
 
                 </div>
 
-                <!-- Footer Legal -->
                 <div class="bg-gray-100 p-4 text-center text-[10px] text-gray-400 uppercase tracking-widest">
                     Documento de uso académico exclusivo • Colegio Regiomontano Contry
                 </div>
@@ -357,7 +345,6 @@
         </div>
     </div>
 
-    <!-- ================= LÓGICA DE LA APLICACIÓN ================= -->
     <script>
         /* --- BASE DE DATOS (JSON) --- */
         const forumData = {
