@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Micrositio interactivo para el 1er Foro Lasallista: Indivisa Manent. Simulación académica y debate social.">
+    <title>1er Foro Lasallista: Indivisa Manent</title>
+    
+    <!-- Tailwind CSS (Estilos Utilitarios) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tipografías Académicas y Modernas -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:ital,wght@0,300;0,400;0,700;1,400&family=Oswald:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Iconografía -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- SISTEMA DE DISEÑO --- */
+        :root {
+            --lasalle-blue: #002f6c;
+            --lasalle-gold: #d4af37;
+            --lasalle-red: #c41e3a;
+            --bg-light: #f8fafc;
+            --text-main: #1e293b;
+        }
+
+        /* Tipografía */
+        body { font-family: 'Lato', sans-serif; background-color: var(--bg-light); color: var(--text-main); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+        h1, h2, h3 { font-family: 'Cinzel', serif; letter-spacing: -0.02em; }
+        h4, h5, .btn-text { font-family: 'Oswald', sans-serif; }
+
+        /* Animaciones y Transiciones */
+        .view-section { display: none; opacity: 0; transition: opacity 0.4s ease-in-out; }
+        .view-section.active { display: block; opacity: 1; animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        @keyframes fadeInUp { 
+            from { opacity: 0; transform: translateY(20px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+
+        /* Elementos UI */
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        
+        .watermark-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;
+            display: flex; flex-direction: column; justify-content: space-around; overflow: hidden; opacity: 0.04;
+        }
+        .watermark-text {
+            font-size: 2rem; font-weight: 900; color: var(--lasalle-blue);
+            transform: rotate(-15deg); white-space: nowrap; text-align: center; width: 120%; margin-left: -10%;
+        }
+
+        /* Modal / Lightbox */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(15, 23, 42, 0.85); z-index: 100; 
+            display: none; justify-content: center; align-items: center; 
+            backdrop-filter: blur(8px); padding: 1rem;
+        }
+        .modal-overlay.open { display: flex; animation: fadeIn 0.3s ease-out; }
+        .modal-container {
+            width: 100%; max-width: 900px; max-height: 90vh; overflow-y: auto;
+            border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            background: white; position: relative;
+        }
+
+        /* Estilos de Impresión (Optimizado para Ahorro de Tinta) */
+        @media print {
+            body * { visibility: hidden; }
+            .modal-overlay, .modal-overlay * { visibility: visible; }
+            .modal-overlay { position: absolute; left: 0; top: 0; background: white; width: 100%; height: auto; display: block !important; padding: 0; }
+            .modal-container { box-shadow: none; max-width: 100%; max-height: none; overflow: visible; }
+            .no-print { display: none !important; }
+            ::-webkit-scrollbar { display: none; }
+            /* Forzar impresión de fondos para gráficos clave */
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        }
+        
+        /* Scrollbar Personalizado */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Marca de Agua de Fondo -->
+    <div class="watermark-container no-print">
+        <div class="watermark-text">1er Foro Lasallista • Indivisa Manent • Español II</div>
+        <div class="watermark-text">Dialogo Social y Fraternidad • Colegio Regiomontano Contry</div>
+        <div class="watermark-text">1er Foro Lasallista • Indivisa Manent • Español II</div>
+    </div>
+
+    <!-- Barra de Navegación -->
+    <nav class="bg-[#002f6c] text-white shadow-lg sticky top-0 z-50 no-print border-b-4 border-[#d4af37]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center cursor-pointer hover:opacity-80 transition group" onclick="navigateTo('home')">
+                    <i class="fa-solid fa-star text-[#d4af37] mr-3 text-xl group-hover:rotate-180 transition duration-500"></i>
+                    <div class="flex flex-col">
+                        <span class="text-lg font-bold tracking-wider font-serif leading-none">INDIVISA MANENT</span>
+                        <span class="text-[10px] uppercase text-blue-200 tracking-widest font-sans">1er Foro Lasallista</span>
+                    </div>
+                </div>
+                <div class="hidden md:block text-xs font-light text-blue-100 text-right">
+                    <p>Colegio Regiomontano Contry</p>
+                    <p class="opacity-70">Docente: Jesús Ángel Álvarez González</p>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ================= VISTA 1: LOBBY (HOME) ================= -->
+    <section id="home" class="view-section active relative z-10 no-print">
+        <!-- Hero Header -->
+        <div class="bg-gradient-to-br from-[#002f6c] to-[#001b3d] text-white pt-20 pb-24 px-4 text-center rounded-b-[3rem] shadow-2xl relative overflow-hidden">
+            <!-- Patrón decorativo -->
+            <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#d4af37 1px, transparent 1px); background-size: 30px 30px;"></div>
+            
+            <div class="relative z-10 max-w-4xl mx-auto">
+                <span class="inline-block py-1 px-4 rounded-full bg-[#d4af37] text-[#002f6c] text-xs font-bold uppercase tracking-widest mb-6 shadow-lg transform hover:scale-105 transition">Proyecto Académico 2026</span>
+                <h1 class="text-4xl md:text-6xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-gray-300 drop-shadow-sm">Diálogo Social y Fraternidad</h1>
+                <p class="text-lg md:text-xl font-light text-blue-100 italic mb-10 max-w-2xl mx-auto">
+                    "La diversidad étnica, cultural y lingüística de México a favor de una sociedad intercultural."
+                </p>
+                
+                <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 max-w-3xl mx-auto hover:bg-white/15 transition duration-300">
+                    <h3 class="text-[#d4af37] font-bold uppercase text-xs mb-2 tracking-[0.2em]"><i class="fa-solid fa-bullseye mr-2"></i>Objetivo PDA</h3>
+                    <p class="text-sm md:text-base leading-relaxed font-light text-gray-100">
+                        "Compara y contrasta textos sobre las tensiones y conflictos en las sociedades contemporáneas y manifiesta, de manera oral o escrita, la necesidad de practicar la comunicación asertiva."
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid de Mesas -->
+        <div class="max-w-7xl mx-auto -mt-16 px-6 pb-20 relative z-20">
+            <div class="flex items-center justify-center mb-8">
+                <h2 class="bg-white px-8 py-3 rounded-full shadow-lg text-2xl font-bold text-[#002f6c] border border-gray-100">
+                    Selecciona tu Mesa de Trabajo
+                </h2>
+            </div>
+            
+            <div id="mesas-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Se llena dinámicamente con JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= VISTA 2: DETALLE DE MESA ================= -->
+    <section id="mesa-detail" class="view-section relative z-10 pb-20 no-print">
+        <!-- Header Inmersivo -->
+        <div id="mesa-header" class="relative py-20 px-6 text-center text-white transition-all duration-700 bg-cover bg-center bg-no-repeat shadow-inner">
+            <div class="absolute inset-0 bg-[#002f6c]/80 backdrop-blur-[2px]"></div> <!-- Overlay -->
+            
+            <div class="relative z-10 max-w-5xl mx-auto">
+                <div class="flex justify-between items-start mb-8">
+                    <button onclick="navigateTo('home')" class="bg-white/10 hover:bg-white/20 backdrop-blur px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-wide transition flex items-center border border-white/30">
+                        <i class="fa-solid fa-arrow-left mr-2"></i> Lobby
+                    </button>
+                    <div class="bg-[#d4af37] text-[#002f6c] px-3 py-1 rounded font-bold text-xs uppercase tracking-widest shadow-lg">
+                        Fase de Análisis
+                    </div>
+                </div>
+
+                <h1 id="mesa-title" class="text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg leading-tight">Título</h1>
+                <h3 id="mesa-subtitle" class="text-xl md:text-3xl font-light font-serif italic text-blue-200">Subtítulo</h3>
+            </div>
+        </div>
+
+        <div class="max-w-6xl mx-auto -mt-12 px-4 relative z-20 space-y-12">
+            
+            <!-- Introducción y One Pager (Layout Grid) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <!-- Columna Izquierda: Contexto -->
+                <div class="lg:col-span-7 space-y-8">
+                    <div class="bg-white p-8 rounded-2xl shadow-xl border-t-8 border-[#002f6c]">
+                        <div class="flex items-center mb-6 pb-4 border-b border-gray-100">
+                            <div class="bg-blue-50 w-12 h-12 flex items-center justify-center rounded-full mr-4 text-[#002f6c] text-xl shadow-sm">
+                                <i class="fa-solid fa-book-open"></i>
+                            </div>
+                            <h4 class="text-2xl font-bold text-gray-800">Contexto del Conflicto</h4>
+                        </div>
+                        <div id="mesa-intro-text" class="text-gray-600 leading-relaxed text-lg space-y-4 font-light text-justify">
+                            <!-- JS -->
+                        </div>
+                    </div>
+
+                    <!-- Call to Action -->
+                    <div class="bg-gradient-to-r from-[#002f6c] to-[#1e40af] p-8 rounded-2xl shadow-xl text-center text-white relative overflow-hidden group cursor-pointer transition transform hover:scale-[1.01]" onclick="showRolesGallery()">
+                        <div class="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-white opacity-5 rounded-full group-hover:scale-150 transition duration-700"></div>
+                        
+                        <h3 class="text-2xl font-bold mb-2">¿Listo para debatir?</h3>
+                        <p class="text-blue-100 mb-6 text-sm">Accede a los expedientes confidenciales y asume tu postura.</p>
+                        
+                        <button class="bg-[#d4af37] text-[#002f6c] px-8 py-3 rounded-full font-bold text-sm uppercase tracking-widest shadow-lg hover:bg-white hover:text-[#002f6c] transition-all flex items-center justify-center mx-auto">
+                            <i class="fa-solid fa-users-viewfinder mr-2"></i> Ver Roles Disponibles
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha: One Pager -->
+                <div class="lg:col-span-5">
+                    <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200 h-full flex flex-col">
+                        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                            <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Hoja de Ruta</span>
+                            <i class="fa-solid fa-clipboard-list text-gray-300 text-xl"></i>
+                        </div>
+                        
+                        <div class="p-6 flex-grow flex flex-col gap-6" id="one-pager-container">
+                            <!-- Pregunta -->
+                            <div class="bg-blue-50/50 p-5 rounded-xl border-l-4" id="op-question-box">
+                                <p class="text-xs font-bold uppercase text-[#002f6c]/60 mb-2">Pregunta Detonante</p>
+                                <p class="text-lg font-serif italic text-gray-800 leading-snug" id="op-question">...</p>
+                            </div>
+
+                            <!-- Estadísticas -->
+                            <div class="space-y-3">
+                                <p class="text-xs font-bold uppercase text-gray-400">Datos Duros (Nuevo León)</p>
+                                <div id="op-stats" class="grid grid-cols-1 gap-3"></div>
+                            </div>
+
+                            <!-- Dilema -->
+                            <div class="mt-auto pt-6 border-t border-dashed border-gray-200 text-center">
+                                <span class="bg-gray-100 text-gray-500 px-2 py-1 rounded text-[10px] font-bold uppercase">Dilema Ético</span>
+                                <p class="text-xl font-bold mt-2" id="op-dilemma">...</p>
+                                <div class="mt-4 text-xs text-gray-400">Mediador: <span id="op-mediator" class="font-bold text-gray-600"></span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= VISTA 3: GALERÍA DE ROLES ================= -->
+    <section id="roles-gallery" class="view-section relative z-10 pb-20 no-print bg-gray-100 min-h-screen">
+        <!-- Sub-Nav Sticky -->
+        <div class="bg-white/90 backdrop-blur border-b border-gray-200 sticky top-16 z-30 px-6 py-4">
+            <div class="max-w-7xl mx-auto flex justify-between items-center">
+                <button onclick="backToMesa()" class="text-gray-500 hover:text-[#002f6c] flex items-center text-sm font-bold uppercase transition">
+                    <i class="fa-solid fa-chevron-left mr-2"></i> Volver al Contexto
+                </button>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <span class="text-xs font-bold uppercase text-gray-500">Expedientes Activos</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-6 mt-10">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-[#002f6c]">Selecciona tu Identidad</h2>
+                <div class="h-1 w-20 bg-[#d4af37] mx-auto mt-4 mb-4"></div>
+                <p class="text-gray-500 max-w-xl mx-auto text-sm">
+                    Cada tarjeta contiene información clasificada. Selecciona el rol que se te ha asignado para preparar tu participación.
+                </p>
+            </div>
+
+            <div id="roles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Inyectado por JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= MODAL DE EXPEDIENTE (LIGHTBOX) ================= -->
+    <div id="role-modal" class="modal-overlay">
+        <div class="modal-container animate-slide-up">
+            
+            <!-- Barra de Herramientas del Modal -->
+            <div class="sticky top-0 z-50 bg-white border-b px-6 py-3 flex justify-between items-center shadow-sm no-print">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center">
+                    <i class="fa-solid fa-lock mr-2 text-[#d4af37]"></i> Confidencial
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="printModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-600 transition" title="Imprimir">
+                        <i class="fa-solid fa-print"></i>
+                    </button>
+                    <button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-red-50 text-[#c41e3a] hover:bg-[#c41e3a] hover:text-white transition" title="Cerrar">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div id="modal-body" class="bg-white">
+                <!-- Header del Expediente -->
+                <div class="p-8 md:p-10 border-b-4 border-[#d4af37] bg-gray-50 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-10 opacity-5 text-9xl transform rotate-12 text-[#002f6c] pointer-events-none">
+                        <i class="fa-solid fa-fingerprint"></i>
+                    </div>
+                    
+                    <span id="m-role-type" class="bg-[#002f6c] text-white px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded mb-4 inline-block shadow">Categoría</span>
+                    <h2 id="m-role-title" class="text-3xl md:text-5xl font-bold text-gray-800 font-serif leading-tight mb-4">Nombre del Rol</h2>
+                    
+                    <div class="flex items-start">
+                        <i class="fa-solid fa-quote-left text-[#d4af37] text-2xl mr-4 opacity-50"></i>
+                        <p id="m-role-postura" class="text-xl md:text-2xl font-light text-gray-600 italic leading-relaxed">...</p>
+                    </div>
+                </div>
+
+                <!-- Contenido del Expediente -->
+                <div class="p-8 md:p-10 grid grid-cols-1 lg:grid-cols-3 gap-10">
+                    
+                    <!-- Columna Principal: Historia -->
+                    <div class="lg:col-span-2 space-y-8">
+                        <div>
+                            <h4 class="flex items-center text-[#002f6c] font-bold text-lg mb-4 border-b border-gray-200 pb-2">
+                                <i class="fa-regular fa-id-card mr-2"></i> Contexto y Trayectoria
+                            </h4>
+                            <div id="m-role-story" class="text-gray-700 text-justify leading-relaxed font-light space-y-4 text-lg"></div>
+                        </div>
+
+                        <div>
+                            <h4 class="flex items-center text-[#002f6c] font-bold text-lg mb-2">
+                                <i class="fa-solid fa-magnifying-glass-arrow-right mr-2"></i> Arsenal de Investigación
+                            </h4>
+                            <p class="text-xs text-gray-500 mb-4 italic pl-1">Investiga estas preguntas para fundamentar tu postura asertiva con datos reales.</p>
+                            <ul id="m-role-research" class="space-y-4">
+                                <!-- Lista inyectada -->
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar: Conceptos Clave -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-blue-50/50 p-6 rounded-xl border border-blue-100 sticky top-4">
+                            <h4 class="text-[#002f6c] font-bold text-sm uppercase tracking-wide mb-4">
+                                <i class="fa-solid fa-tags mr-2"></i> Palabras Clave
+                            </h4>
+                            <div id="m-role-keywords" class="flex flex-wrap gap-2 mb-6">
+                                <!-- Tags -->
+                            </div>
+                            
+                            <div class="bg-yellow-50 p-4 rounded border border-yellow-200 text-xs text-yellow-800 leading-relaxed">
+                                <i class="fa-solid fa-lightbulb mr-1 text-[#d4af37]"></i> 
+                                <strong>Estrategia:</strong> Utiliza estos términos técnicos durante tu intervención para aumentar la credibilidad de tu argumento.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Footer Legal -->
+                <div class="bg-gray-100 p-4 text-center text-[10px] text-gray-400 uppercase tracking-widest">
+                    Documento de uso académico exclusivo • Colegio Regiomontano Contry
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= LÓGICA DE LA APLICACIÓN ================= -->
+    <script>
+        /* --- BASE DE DATOS (JSON) --- */
+        const forumData = {
+            1: {
+                title: "Integración Educativa", subtitle: "Excelencia vs Inclusión", icon: "fa-graduation-cap", color: "#0d47a1",
+                img: "https://images.unsplash.com/photo-1427504743050-6605296530a7?q=80&w=2070&auto=format&fit=crop",
+                intro: "El sistema educativo de Nuevo León enfrenta un desafío sin precedentes. Las aulas de nuestras secundarias públicas están recibiendo una ola de estudiantes provenientes de Haití, Venezuela, Centroamérica y otros estados de la República. Esto ha generado una tensión palpable entre dos valores fundamentales: la excelencia académica y la inclusión social.<br><br>Por un lado, los padres de familia locales y los estudiantes de alto rendimiento temen que el ritmo de la clase se detenga para nivelar a los recién llegados. Por otro lado, los docentes se ven rebasados, intentando cumplir con el derecho universal a la educación sin recursos adicionales. ¿Es la educación un bien de consumo exclusivo, o es un derecho humano que debe adaptarse al más vulnerable?",
+                onePager: {
+                    q: "¿Debe la escuela frenar su ritmo académico para esperar a los alumnos migrantes, o priorizar la competitividad de los locales?",
+                    stats: [{v:"45+", d:"Alumnos por aula en secundarias saturadas."}, {v:"2 Semanas", d:"Tiempo promedio de integración escolar."}, {v:"Barreras", d:"Idioma y revalidación como obstáculo."}],
+                    dilemma: "Derecho Individual al Éxito VS Derecho Colectivo a la Educación",
+                    mediator: "El Docente"
+                },
+                roles: [
+                    { t:"El Estudiante de Alto Rendimiento", type:"Local", m:"Mi futuro está en riesgo.", s:"Desde que tienes memoria, la escuela ha sido tu principal campo de batalla. Tus padres trabajan doble turno para darte lo mejor, y te han inculcado que la única vía para la movilidad social es la excelencia. Llevas años preparándote para el examen de preparatoria. Sin embargo, este ciclo escolar ha traído un cambio que percibes como amenaza. La llegada de compañeros con rezagos ha obligado a detener el ritmo de las clases avanzadas. Sientes una frustración creciente que te cuesta confesar: te preguntas si es justo que tu preparación se sacrifique en nombre de la inclusión. No es que no quieras ayudar, es que sientes que el tiempo es un recurso finito.", p:"La inclusión debe garantizarse con recursos extra, no sacrificando el nivel de quienes cumplimos con la excelencia.", r:["(Quién): ¿Quiénes son los responsables legales de garantizar que la nivelación de unos alumnos no frene el aprendizaje de los avanzados?", "(Cuánto): ¿Cuánto tiempo efectivo de clase se pierde en repeticiones o nivelaciones básicas según estudios de la OCDE sobre aulas heterogéneas?", "(Dónde): ¿En qué países o sistemas educativos existen modelos exitosos de 'aulas de enlace' que no afectan al grupo base?", "(Causa-Efecto): Si el nivel de exigencia baja para acomodar a todos, ¿cuál es el efecto comprobado en los resultados de pruebas estandarizadas como PISA a largo plazo?", "(Cómo): ¿Cómo funcionan los sistemas de tutoría entre pares para que el alumno avanzado refuerce su conocimiento enseñando, mitigando el retraso?", "(Cuándo): ¿En qué momento del ciclo escolar es pedagógicamente recomendable integrar a un alumno con barreras de idioma al grupo regular?"], k:["Competitividad Académica", "Costo de Oportunidad", "Estandarización", "Rezago Escolar", "Meritocracia"] },
+                    { t:"El Estudiante Recién Llegado", type:"Migrante", m:"Un potencial en pausa.", s:"Tu historia no comienza en este pupitre, sino a miles de kilómetros. Tu viaje hacia Monterrey estuvo marcado por la incertidumbre. En tu lugar de origen eras un buen estudiante, pero la travesía borró parte de ese avance. Ahora te sientes como un extraño en un planeta ajeno. Los códigos sociales son un misterio y a veces el idioma levanta un muro. Cada vez que levantas la mano, sientes las miradas de impaciencia. Sabes que tienes la capacidad intelectual para brillar, solo necesitas que el sistema deje de juzgarte por tu pasado inmediato. Tu lucha es por demostrar que no eres una carga.", p:"Mi rezago es circunstancial, no intelectual. Exijo el derecho a la educación sin discriminación.", r:["(Cuándo): ¿Cuándo se considera que un estudiante migrante ha superado el choque cultural inicial y la etapa de duelo migratorio?", "(Qué): ¿Qué dice exactamente el Artículo 3 Constitucional sobre la educación de personas extranjeras en suelo mexicano?", "(Cómo): ¿Cómo afecta el estrés post-traumático de la migración en la capacidad de concentración y memoria a corto plazo?", "(Quién): ¿Quién debe proveer los materiales de apoyo y diccionarios para la nivelación (la escuela, el estado o la familia)?", "(Causa-Efecto): Si se niega el apoyo educativo hoy, ¿cuál es el efecto estadístico en la integración social y laboral futura de esos jóvenes?", "(Dónde): ¿Dónde pueden las escuelas solicitar apoyo o materiales específicos para la atención de población migrante?"], k:["Derecho Universal", "Barreras de Aprendizaje", "Duelo Migratorio", "Equidad", "Resiliencia"] },
+                    { t:"El Docente Titular", type:"Educador", m:"Vocación vs Realidad.", s:"Elegiste la docencia por vocación, pero la realidad operativa te ha desgastado. Tienes grupos de 45 adolescentes con un universo de necesidades. La Secretaría exige cumplir planes rigurosos y, al mismo tiempo, lograr la 'inclusión total' sin recursos adicionales. Nadie te preguntó si estabas preparado, ni te dieron materiales. Llegas a casa cargando preocupaciones, sintiendo que eres el único amortiguador entre una política idealista y una realidad precaria. Te duele ver cómo los locales se aburren y los migrantes se frustran, y sientes que le fallas a ambos.", p:"La inclusión sin presupuesto es demagogia. No puedo ser docente, psicólogo y traductor al mismo tiempo.", r:["(Cuánto): ¿Cuál es el número máximo de alumnos por grupo recomendado por la UNESCO para una enseñanza personalizada efectiva?", "(Dónde): ¿Dónde están los recursos federales etiquetados específicamente para escuelas que reciben alta población migrante?", "(Causa-Efecto): ¿Qué efectos físicos y psicológicos tiene la sobrecarga laboral crónica en la salud del docente?", "(Cómo): ¿Cómo se debe capacitar pedagógicamente a un maestro para atender aulas multiculturales y multilingües?", "(Quién): ¿Quién es responsable legalmente de proveer las herramientas pedagógicas para la inclusión (el director, la SEP, el sindicato)?", "(Cuándo): ¿Cuándo se vuelve pedagógicamente inviable atender a un grupo debido a la heterogeneidad extrema de niveles académicos?"], k:["Burnout", "Ratio Alumno-Docente", "Adecuación Curricular", "Precarización", "Gestión Diversidad"] },
+                    { t:"El Padre de Familia (Tesorero)", type:"Local", m:"Las cuentas claras.", s:"Eres un pilar de la comunidad escolar. Has dedicado años a gestionar rifas y donativos para tener aires acondicionados y baños funcionales. Te enorgullece ver las mejoras logradas con el dinero de las familias locales. Sin embargo, la política de puertas abiertas te preocupa. Ves cómo la matrícula aumenta con familias que no pueden aportar cuotas voluntarias. Entiendes su situación, pero los números no mienten: más alumnos significan más desgaste. Temes que la escuela colapse financieramente. Sientes injusto pedirle siempre a los mismos que carguen con el costo.", p:"La solidaridad debe ser sostenible. Si se acaban los recursos, la escuela se cae para todos.", r:["(Quién): ¿Quién cubre realmente los gastos de mantenimiento menor (luz, agua, reparaciones) en las escuelas públicas de NL?", "(Cuánto): ¿Cuánto cuesta en promedio el mantenimiento anual por alumno en una secundaria pública?", "(Cómo): ¿Cómo funcionan legalmente las Asociaciones de Padres de Familia y sus límites para exigir cuotas?", "(Causa-Efecto): ¿Qué sucede con la infraestructura escolar cuando la población estudiantil supera la capacidad de diseño del plantel?", "(Dónde): ¿De dónde pueden obtener recursos adicionales las escuelas públicas ante el aumento de matrícula si el gobierno no aporta más?", "(Cuándo): ¿Cuándo se considera que una escuela ha superado su capacidad operativa y financiera crítica?"], k:["Sostenibilidad Financiera", "Autogestión", "Infraestructura", "Corresponsabilidad", "Presupuesto"] },
+                    { t:"El Psicólogo Escolar", type:"Técnico", m:"Primero la persona.", s:"Tu oficina es un confesionario de angustias. Mientras todos discuten cuotas, tú ves el sufrimiento silencioso. Atiendes a migrantes que lloran porque extrañan su hogar y a locales estresados por ser 'perfectos'. Observas cómo se forman guetos y cómo el prejuicio se disfraza de broma. Sabes que un cerebro bajo amenaza es incapaz de aprender matemáticas. Tu frustración radica en que el sistema parece ciego ante la bomba de tiempo emocional. Tu lucha es humanizar la escuela.", p:"La salud mental es el prerequisito del aprendizaje. Sin bienestar emocional, la excelencia es una ficción.", r:["(Causa-Efecto): ¿Cómo afecta el cortisol (hormona del estrés) el proceso de aprendizaje y memoria en los adolescentes?", "(Qué): ¿Qué es el 'bullying xenofóbico' y cuáles son sus indicadores tempranos en el aula?", "(Cómo): ¿Cómo se implementan protocolos de acogida socioemocional efectivos para estudiantes de nuevo ingreso?", "(Quién): ¿Quiénes son los actores clave para detectar y prevenir la depresión y ansiedad en el entorno escolar?", "(Cuánto): ¿Cuánto aumenta el riesgo de deserción escolar cuando un alumno no se siente perteneciente a su comunidad?", "(Dónde): ¿En qué espacios escolares se manifiestan más comúnmente las dinámicas de exclusión?"], k:["Bienestar Socioemocional", "Clima Escolar", "Prevención Violencia", "Neuroeducación", "Adaptación"] },
+                    { t:"El Director del Plantel", type:"Autoridad", m:"Equilibrio imposible.", s:"Tu posición es solitaria. Eres el pararrayos de todos los conflictos. Tienes oficios federales que te obligan a garantizar el acceso universal, pero en tu puerta tienes padres exigiendo que no baje el nivel. Tienes que hacer política educativa sin presupuesto. Te sientes un malabarista: si te inclinas a la inclusión, pierdes a los padres; si te inclinas a la exigencia, violas la ley. Tu objetivo es pragmático: mantener la escuela abierta y en paz.", p:"Mi obligación es cumplir la ley y mantener la gobernabilidad. Busco el equilibrio posible entre el derecho y la realidad.", r:["(Qué): ¿Qué establecen las Normas de Control Escolar vigentes sobre la inscripción de alumnos sin documentos?", "(Quién): ¿Ante quién responde legalmente un director si niega el acceso a un estudiante por falta de cupo o recursos?", "(Cómo): ¿Cómo se gestionan administrativamente los recursos humanos y materiales limitados en una escuela pública?", "(Causa-Efecto): Si se pierde el apoyo de la Asociación de Padres, ¿cuál es el impacto inmediato en la operación diaria de la escuela?", "(Cuándo): ¿En qué situaciones extremas está facultado un director para solicitar intervención de autoridades superiores?", "(Dónde): ¿Dónde termina la autonomía de gestión de una escuela y empieza la responsabilidad directa del Estado?"], k:["Gobernabilidad", "Normatividad", "Gestión Crisis", "Derecho Acceso", "Liderazgo"] },
+                    { t:"El Estudiante Mediador", type:"Local", m:"Puentes, no muros.", s:"Eres un optimista curioso. Mientras otros ven problemas, tú ves un mundo fascinante. Has descubierto talento en tus compañeros nuevos y aprendes de ellos. Te molesta la cerrazón de la gente que prefiere la uniformidad. Crees que el miedo a lo diferente es ignorancia. Tu rol es difícil: a veces te critican por juntarte con los 'raros', pero sabes que estás construyendo el futuro.", p:"La diversidad no resta, multiplica. Aprender a convivir con el mundo es la mejor lección.", r:["(Qué): ¿Qué son las competencias interculturales y por qué son valoradas en el mundo laboral moderno?", "(Cómo): ¿Cómo beneficia cognitivamente al cerebro la interacción con personas de culturas y lenguas diversas?", "(Quién): ¿Quiénes han sido líderes históricos que promovieron el diálogo entre culturas para resolver conflictos?", "(Causa-Efecto): ¿Cómo la integración cultural reduce los índices de violencia y discriminación a largo plazo en una comunidad?", "(Dónde): ¿En qué ciudades o países la diversidad cultural ha sido un motor comprobado de innovación y creatividad?", "(Cuándo): ¿Cuándo se convierte la diversidad en una ventaja competitiva para un grupo de trabajo?"], k:["Competencia Intercultural", "Capital Cultural", "Ciudadanía Global", "Enriquecimiento", "Tolerancia"] }
+                ]
+            },
+            2: {
+                title: "Justicia Hídrica", subtitle: "Derecho vs Escasez", icon: "fa-droplet", color: "#006064",
+                img: "https://images.unsplash.com/photo-1504370805625-d32c54b16100?q=80&w=1632&auto=format&fit=crop",
+                intro: "Nuevo León vive bajo la sombra del Día Cero. La crisis hídrica se ha convertido en una realidad cotidiana. En este escenario, surge un conflicto social: ¿Quién tiene derecho al agua cuando no hay suficiente? Los residentes históricos sienten que la migración colapsa la red. Los recién llegados a la periferia reclaman el agua como derecho humano. La industria defiende su consumo como motor de empleo. ¿Debemos cerrar la ciudad o garantizar el agua sin importar el código postal?",
+                onePager: {
+                    q: "Si el agua se acaba, ¿es justo culpar a la gente que llega de fuera o debemos limitar el crecimiento industrial?",
+                    stats: [{v:"Crítico", d:"Nivel de estrés hídrico metropolitano."}, {v:"Periferia", d:"Zonas de crecimiento sin red potable."}, {v:"Industria", d:"Gran consumidor y principal empleador."}],
+                    dilemma: "Viabilidad Técnica VS Dignidad Humana",
+                    mediator: "El Docente"
+                },
+                roles: [
+                    { t:"El Residente Histórico", type:"Local", m:"Primero los de casa.", s:"Eres la memoria viva de tu colonia. Viste pavimentar estas calles. Durante 30 años has pagado cada recibo a tiempo. Pero tu calidad de vida se ha desplomado. El agua es un tesoro incierto. Ves cómo la mancha urbana devora el paisaje, llena de gente nueva que llegó cuando la fiesta terminó. Sientes que te roban tu tranquilidad. No es odio, es supervivencia: si el pastel es chico, a nadie le tocará nada.", p:"La ciudad tiene un límite físico. La prioridad debe ser para quienes hemos sostenido este lugar por décadas.", r:["(Cuánto): ¿En qué porcentaje ha crecido la población de Monterrey debido a la migración en los últimos 10 años?", "(Causa-Efecto): ¿Cuál es la relación directa entre el crecimiento demográfico y la disminución de los niveles de las presas?", "(Cómo): ¿Cómo afecta la sobredemanda de servicios en la calidad de vida de los residentes establecidos?", "(Quién): ¿Quién tiene la responsabilidad de frenar el crecimiento urbano cuando los recursos no alcanzan?", "(Dónde): ¿Qué ciudades en el mundo han implementado políticas de 'crecimiento cero' por falta de agua?", "(Cuándo): ¿Cuándo se declaró oficialmente el estado de emergencia hídrica en Nuevo León?"], k:["Capacidad de Carga", "Derecho Antigüedad", "Seguridad Hídrica", "Planeación", "Escasez"] },
+                    { t:"El Trabajador de la Periferia", type:"Migrante", m:"Sin agua no hay vida.", s:"Llegaste con esperanza de progresar. Levantas torres con albercas lujosas, pero en tu casa no tienes agua corriente. Gastas gran parte de tu sueldo en pipas o garrafones. Te indigna la hipocresía de una sociedad que te necesita para generar riqueza pero te niega servicios básicos. Te dicen que tu colonia es 'irregular', pero tu necesidad es regular. Sientes violado tu derecho humano.", p:"Si mis manos construyen esta ciudad, tengo derecho a beber de su agua. El agua es un Derecho Humano.", r:["(Qué): ¿Qué establece la Resolución 64/292 de la ONU sobre el agua como derecho humano?", "(Cuánto): ¿Cuánto gasta una familia de la periferia en agua (pipas/garrafones) comparado con una familia con red potable?", "(Quién): ¿Quiénes son los más afectados por las enfermedades derivadas de la falta de higiene por escasez?", "(Causa-Efecto): ¿Cómo afecta la falta de agua en el desarrollo escolar y laboral de las personas en zonas marginadas?", "(Cómo): ¿Cómo se justifica legalmente negar el servicio de agua a asentamientos en proceso de regularización?", "(Dónde): ¿En qué municipios de la periferia de Monterrey se concentra la mayor escasez de agua potable?"], k:["Derecho Humano", "Desigualdad", "Marginación", "Justicia Distributiva", "Vulnerabilidad"] },
+                    { t:"El Representante Industrial", type:"Empresa", m:"Empleo es bienestar.", s:"Diriges una planta que sostiene a miles de familias. Invertiste millones en eficiencia hídrica. Sin embargo, en sequía eres el villano favorito. Te frustra que ignoren que el agua que usas se traduce en salarios que mantienen viva a la ciudad. Si te cortan el suministro, tendrás que despedir gente, creando una crisis peor.", p:"Sin industria no hay empleo. Generamos riqueza y usamos el agua para producir, no para desperdiciar.", r:["(Cuánto): ¿Qué porcentaje del total de agua disponible en Nuevo León consume realmente la industria frente al uso público urbano y agrícola?", "(Causa-Efecto): ¿Cuál sería el impacto económico (desempleo/PIB) si se restringiera el agua al sector industrial en un 50%?", "(Cómo): ¿Cómo funcionan las plantas de tratamiento de aguas residuales en la industria para reciclar el recurso?", "(Quién): ¿Quién otorga las concesiones de agua a las empresas y bajo qué criterios técnicos (CONAGUA)?", "(Dónde): ¿En qué zonas industriales se ha logrado reducir el consumo de agua por unidad producida en los últimos años?", "(Qué): ¿Qué es el 'agua virtual' y cómo se relaciona con la exportación de productos desde Monterrey?"], k:["Desarrollo Económico", "Eficiencia Hídrica", "PIB", "Concesiones", "Responsabilidad"] },
+                    { t:"El Activista Ambiental", type:"ONG", m:"El agua es de todos.", s:"Estudias los ecosistemas y ves su colapso. La crisis no es culpa del migrante, sino de un modelo depredador. Te indigna que se culpe a los vulnerables mientras grandes intereses acaparan el recurso. Tu lucha es por la verdad científica. Entiendes que el agua es un bien común finito. Tu voz es la conciencia incómoda.", p:"El problema no es la gente, es el acaparamiento. El agua es un bien común, no un privilegio.", r:["(Causa-Efecto): ¿Cómo ha afectado el cambio climático a los patrones de lluvia en el noreste de México en los últimos 20 años?", "(Quién): ¿Quiénes son los mayores concesionarios de agua en el estado y cuánto pagan realmente por el recurso?", "(Qué): ¿Qué es el 'estrés hídrico' y qué significa que Monterrey esté en semáforo rojo?", "(Dónde): ¿En qué condiciones se encuentran los mantos acuíferos subterráneos de la región?", "(Cómo): ¿Cómo afecta la deforestación y la urbanización de las zonas de recarga a la disponibilidad futura de agua?", "(Cuándo): ¿Cuándo se estima que llegaremos al 'Día Cero' si no se cambian las políticas de consumo actuales?"], k:["Ciclo Hidrológico", "Justicia Ecológica", "Sustentabilidad", "Sobreexplotación", "Huella Hídrica"] },
+                    { t:"El Empresario de Pipas", type:"Empresa", m:"Solución de mercado.", s:"Eres pragmático. Ves una oportunidad de mercado en la necesidad. Invertiste en logística para llevar agua donde no hay red. Te molesta que te llamen 'buitre'. Estás llenando un vacío del Estado. Cobras porque gastas en operación. Crees en la oferta y demanda, y sientes que tu servicio mantiene la paz social.", p:"No soy el villano, soy la solución logística. Mi servicio cuesta porque llevar agua a los cerros es difícil.", r:["(Cómo): ¿Cómo se estructura el precio de una pipa de agua (costo del líquido + transporte + ganancia)?", "(Quién): ¿Quién regula los precios de venta de agua en pipas privadas y existen topes oficiales?", "(Dónde): ¿En qué zonas de la ciudad es indispensable el servicio de pipas debido a la falta total de red?", "(Causa-Efecto): ¿Qué pasaría en las colonias periféricas si mañana dejaran de operar todas las pipas privadas?", "(Cuánto): ¿Cuánto ha aumentado la demanda de servicios privados de agua en los últimos 5 años?", "(Qué): ¿Qué riesgos operativos enfrentan los choferes de pipas en zonas de alta tensión social?"], k:["Logística", "Costos Operativos", "Oferta y Demanda", "Servicio Privado", "Mercado Escasez"] },
+                    { t:"El Urbanista Técnico", type:"Técnico", m:"La física no miente.", s:"Amas el orden y la lógica. Ves la ciudad como un sistema con límites físicos. Te frustra que la política ignore la física. Bombear agua a cerros irregulares es insostenible. Crees que permitir el crecimiento desordenado es irresponsable. Dices la verdad incómoda: no se puede urbanizar sin factibilidad.", p:"La planeación no es un capricho. Expandir la ciudad sin factibilidad hídrica es un suicidio urbano.", r:["(Qué): ¿Qué es un 'Dictamen de Factibilidad de Agua' y por qué es requisito para construir?", "(Cómo): ¿Cómo funciona el sistema de bombeo de agua en Monterrey y cuánto cuesta elevar el agua a las zonas altas?", "(Causa-Efecto): ¿Qué impacto tiene la dispersión urbana (ciudad extendida) en la pérdida de agua por fugas en la red?", "(Dónde): ¿En qué áreas de la zona metropolitana está técnicamente prohibido el crecimiento urbano por falta de agua?", "(Quién): ¿Quién autoriza los cambios de uso de suelo que permiten urbanizar zonas sin agua garantizada?", "(Cuándo): ¿Cuándo se actualizó por última vez el Plan de Desarrollo Urbano del estado y qué dice sobre el agua?"], k:["Factibilidad", "Ordenamiento", "Infraestructura", "Eficiencia", "Planeación"] },
+                    { t:"La Madre de Familia", type:"Vulnerable", m:"Mis hijos tienen sed.", s:"Eres experta en crisis. Tu día es una batalla contra la escasez. Reciclas cada gota. Te angustia no poder bañar a tus hijos o darles ropa limpia. Sientes que los debates políticos están lejos de tu realidad urgente. No te importan las concesiones, te importa que tus hijos tengan agua hoy. Tu voz es el grito de la necesidad básica.", p:"No entiendo de política, entiendo que mis hijos tienen sed. La salud no puede esperar a que llueva.", r:["(Causa-Efecto): ¿Qué enfermedades gastrointestinales y de la piel aumentan directamente por la falta de acceso a agua limpia?", "(Cuánto): ¿Cuántos litros de agua diarios recomienda la OMS para cubrir las necesidades básicas de una persona?", "(Cómo): ¿Cómo afecta la falta de agua en las escuelas a la asistencia y el rendimiento de los niños?", "(Quién): ¿Quién es responsable de garantizar el abasto mediante pipas gratuitas en zonas vulnerables?", "(Qué): ¿Qué es la 'pobreza hídrica' y cómo afecta desproporcionadamente a las mujeres y niños?", "(Dónde): ¿En qué condiciones de almacenamiento de agua se ven obligadas a vivir las familias sin tinaco o cisterna?"], k:["Salud Pública", "Economía Doméstica", "Derechos Infancia", "Estrés Familiar", "Dignidad"] }
+                ]
+            },
+            3: {
+                title: "Gentrificación", subtitle: "Renovación vs Expulsión", icon: "fa-city", color: "#e65100",
+                img: "https://images.unsplash.com/photo-1449824913929-2b6a3e8bd3ad?q=80&w=1470&auto=format&fit=crop",
+                intro: "El centro de Monterrey cambia de rostro. Edificios antiguos caen para dar paso a torres modernas. A esto le llamamos 'renovación', pero tiene un lado oscuro: la gentrificación. La llegada de residentes con mayor poder adquisitivo eleva costos y expulsa a familias y comerciantes históricos. ¿Es justo que el progreso signifique perder el hogar? ¿Tiene derecho el dueño a vender al mejor postor aunque destruya la comunidad? Es una lucha por el alma del barrio.",
+                onePager: {
+                    q: "¿El 'Nuevo Centro' es desarrollo para todos o solo un negocio inmobiliario que expulsa a los pobres?",
+                    stats: [{v:"+200%", d:"Aumento en rentas céntricas."}, {v:"Torres", d:"Vivienda vertical sustituye barrios."}, {v:"Nómadas", d:"Llegada de extranjeros con alto poder adquisitivo."}],
+                    dilemma: "Progreso Económico VS Derecho al Arraigo",
+                    mediator: "El Docente"
+                },
+                roles: [
+                    { t:"La Inquilina Histórica", type:"Local", m:"Mi barrio es mi vida.", s:"Este barrio es quien eres. Aquí jugaste, aquí conociste a tu pareja. Tu renta era accesible. Pero todo cambió con las cafeterías caras y letreros en inglés. Llegó la carta: no renuevan tu contrato porque remodelarán para Airbnb. Sientes dolor y rabia. Te corren porque tu dinero no vale suficiente. Te sientes invisible ante el mercado inmobiliario.", p:"El dinero no compra la memoria. Tengo derecho a no ser desplazada por la especulación.", r:["(Qué): ¿Qué es exactamente la gentrificación y cuáles son sus fases típicas?", "(Causa-Efecto): ¿Cómo la llegada de población flotante (turistas/nómadas) impacta directamente en el precio de las rentas locales?", "(Quién): ¿A quién protege la ley de arrendamiento en caso de no renovación de contrato por causas comerciales?", "(Dónde): ¿Qué barrios de Monterrey están actualmente en procesos acelerados de gentrificación (Barrio Antiguo, Centro)?", "(Cómo): ¿Cómo afecta la pérdida de vecinos antiguos a la seguridad y la identidad de una comunidad?", "(Cuánto): ¿Cuánto ha aumentado el costo promedio de renta en el centro de la ciudad en los últimos 3 años?"], k:["Desplazamiento Forzado", "Arraigo", "Gentrificación", "Especulación", "Tejido Social"] },
+                    { t:"El Nuevo Residente", type:"Local", m:"Busco mi lugar.", s:"Eres un profesionista joven. Estás harto de horas en el tráfico. Buscaste un lugar céntrico y seguro. Te costó pagarlo, pero valoras tu calidad de vida. Te sientes atacado cuando te llaman 'invasor'. No quieres correr a nadie, ejerces tu derecho a vivir donde te convenga. Crees que tu llegada trajo mejoras: luz, seguridad, parques cuidados.", p:"Todos tenemos derecho a un lugar digno. La renovación es positiva y soy un ciudadano más.", r:["(Qué): ¿Qué es la regeneración urbana y cuáles son sus beneficios ambientales y sociales?", "(Por qué): ¿Por qué es importante redensificar los centros de las ciudades para reducir el tráfico y la contaminación?", "(Quién): ¿Quiénes son los nuevos residentes del centro y qué buscan (seguridad, cercanía, servicios)?", "(Cómo): ¿Cómo contribuye la ocupación de espacios vacíos a la seguridad pública de una zona?", "(Dónde): ¿En qué otras ciudades del mundo la regeneración del centro ha sido clave para la calidad de vida?", "(Causa-Efecto): ¿Si no se renueva el centro, cuál es el riesgo de abandono y deterioro urbano?"], k:["Calidad de Vida", "Movilidad", "Derecho a la Ciudad", "Regeneración", "Libertad"] },
+                    { t:"El Desarrollador Inmobiliario", type:"Empresa", m:"Construyendo futuro.", s:"Apuestas por la ciudad. Donde otros ven ruinas, tú ves potencial. Arriesgas capital para restaurar y modernizar. Crees que salvas al centro de la decadencia. Generas empleos y plusvalía. Te frustra ser el enemigo público. Crees que la ciudad debe evolucionar o morir. La plusvalía beneficia a todos vía impuestos.", p:"La ciudad debe evolucionar. La inversión privada rescata el patrimonio del abandono.", r:["(Qué): ¿Qué es el déficit de vivienda y cómo ayuda la construcción vertical a solucionarlo?", "(Cuánto): ¿Cuánta inversión privada se requiere para renovar una manzana del centro histórico?", "(Causa-Efecto): ¿Cómo impacta la inversión inmobiliaria en la recaudación de impuestos municipales (predial)?", "(Cómo): ¿Cómo se financian los proyectos de regeneración urbana sin dinero público?", "(Quién): ¿Quiénes se benefician del aumento de valor de las propiedades (plusvalía) en una zona renovada?", "(Dónde): ¿Qué ejemplos existen de zonas rescatadas por la inversión privada que hoy son exitosas y seguras?"], k:["Plusvalía", "Inversión Privada", "Densificación", "Desarrollo", "Renovación"] },
+                    { t:"El Comerciante Tradicional", type:"Local", m:"Tradición en riesgo.", s:"Tu negocio es una institución. Tus clientes eran amigos. Pero el barrio cambió. Los nuevos vecinos van a cadenas o piden por app. Tus ventas caen y tus costos suben. Sientes que la modernidad te asfixia. Te duele ver cerrar negocios vecinos. Luchas por la supervivencia de la economía local frente a la estandarización.", p:"Mi negocio es el alma del barrio. Defiendo la economía local frente a cadenas desleales.", r:["(Cómo): ¿Cómo cambian los patrones de consumo cuando cambia el perfil demográfico de un barrio?", "(Qué): ¿Qué valor aporta el comercio local a la seguridad y cohesión social de una calle?", "(Causa-Efecto): ¿Cómo afecta el aumento de rentas comerciales a la supervivencia de las PYMES tradicionales?", "(Quién): ¿Quiénes son los dueños de las nuevas franquicias vs. los dueños de negocios locales (concentración de riqueza)?", "(Dónde): ¿En qué ciudades se han implementado políticas para proteger al comercio tradicional de la gentrificación?", "(Cuánto): ¿Cuánto dinero de una compra local se queda en la comunidad vs. una compra en cadena internacional?"], k:["Economía Local", "Comercio Tradicional", "Competencia", "Patrimonio", "Resiliencia"] },
+                    { t:"El Artista Urbano", type:"Activista", m:"La calle es de todos.", s:"La ciudad es tu lienzo. Usas las plazas para expresarte. Pero la 'renovación' trajo guardias y prohibiciones. Sientes que privatizan el aire. Te corren por 'mala imagen'. Te indigna que se valore el arte en galerías pero se criminalice en la calle. Defiendes el derecho a habitar el espacio público libremente.", p:"La calle es de quien la camina. El arte y la cultura deben ser libres y públicos.", r:["(Qué): ¿Qué es el derecho a la ciudad según la ONU-Hábitat?", "(Dónde): ¿En qué espacios de Monterrey se ha restringido el acceso público bajo pretextos de seguridad o propiedad privada?", "(Cómo): ¿Cómo contribuye el arte urbano a la identidad y seguridad de un barrio?", "(Quién): ¿Quién decide qué es 'buena imagen' y qué es 'mala imagen' en el espacio público?", "(Causa-Efecto): ¿Qué sucede con la vida comunitaria cuando se eliminan los espacios de encuentro gratuitos?", "(Cuándo): ¿En qué momento histórico comenzó la tendencia de privatizar plazas y parques en las ciudades modernas?"], k:["Espacio Público", "Derecho Ciudad", "Cultura", "Privatización", "Exclusión"] },
+                    { t:"El Nómada Digital", type:"Global", m:"Ciudadano del mundo.", s:"Trabajas para el extranjero y elegiste Monterrey por su cultura y costos. Te encanta vivir aquí, gastas e inviertes. Te sorprende la hostilidad. Te culpan de la inflación, pero solo eres un inquilino más. No fijas rentas, es el mercado. Crees que tu presencia es positiva. Sientes que eres un chivo expiatorio de problemas complejos.", p:"Amo esta ciudad y traigo inversión. No soy culpable de la inflación, soy un visitante.", r:["(Qué): ¿Qué es un nómada digital y cuál es su perfil económico?", "(Cuánto): ¿Cuál es la derrama económica estimada de los visitantes de larga estancia en una ciudad?", "(Causa-Efecto): ¿Es la llegada de extranjeros la causa principal de la inflación o hay factores macroeconómicos más fuertes?", "(Cómo): ¿Cómo beneficia el intercambio cultural a la apertura y modernización de una sociedad local?", "(Dónde): ¿Qué ciudades del mundo compiten activamente por atraer a este tipo de migrantes calificados?", "(Quién): ¿Quiénes se benefician directamente del consumo de los nómadas digitales (restaurantes, servicios, turismo)?"], k:["Globalización", "Derrama Económica", "Turismo", "Movilidad", "Inflación"] },
+                    { t:"El Planificador Municipal", type:"Autoridad", m:"Finanzas sanas.", s:"Debes hacer cuadrar los números de la ciudad. Una ciudad dispersa es cara de mantener; un centro denso es eficiente. Fomentas vivir en el centro para la sostenibilidad financiera. Entiendes el dolor del desplazamiento, pero ves por el bien común a largo plazo. Si el centro muere, la ciudad pierde.", p:"Para tener servicios, necesitamos finanzas sanas. La redensificación es la vía sostenible.", r:["(Por qué): ¿Por qué es más caro para el municipio llevar servicios a la periferia que mantener el centro?", "(Qué): ¿Qué es el impuesto predial y por qué es vital para las finanzas municipales?", "(Cómo): ¿Cómo se pueden crear políticas públicas para mitigar el desplazamiento sin frenar la inversión?", "(Causa-Efecto): ¿Qué pasa con los servicios públicos cuando la recaudación fiscal de una zona cae por abandono?", "(Quién): ¿Quién tiene la facultad legal para cambiar los usos de suelo y densidades en la ciudad?", "(Dónde): ¿En qué consiste el modelo de 'Ciudad de 15 minutos' y cómo se aplica a la renovación del centro?"], k:["Finanzas Públicas", "Planeación", "Recaudación", "Ciudad Compacta", "Desarrollo"] }
+                ]
+            },
+            4: {
+                title: "Empleo y Dignidad", subtitle: "Competencia vs Necesidad", icon: "fa-helmet-safety", color: "#ff6f00",
+                img: "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?q=80&w=1470&auto=format&fit=crop",
+                intro: "Monterrey es la capital industrial, el 'Sueño Mexicano' para miles. Pero el mercado laboral se tensa. Los trabajadores locales sienten que los migrantes 'abaratan' la mano de obra. Los empresarios buscan eficiencia. En medio, la explotación laboral y el 'dumping social' amenazan derechos. ¿Es competencia desleal o libre mercado? ¿Cómo protegemos el empleo nacional sin discriminar?",
+                onePager: {
+                    q: "¿Es verdad que los migrantes quitan trabajo, o son contratados porque los locales no quieren esos empleos?",
+                    stats: [{v:"Déficit", d:"Falta mano de obra en construcción."}, {v:"Dumping", d:"Riesgo de baja salarial."}, {v:"PIB", d:"Aporte económico migrante."}],
+                    dilemma: "Libre Mercado VS Derechos Laborales",
+                    mediator: "El Docente"
+                },
+                roles: [
+                    { t:"El Trabajador Local", type:"Local", m:"Sueldo justo.", s:"Trabajaste duro toda tu vida. Con tu sueldo mantenías a tu familia. Pero tu patrón redujo personal y fuiste reemplazado por un migrante que aceptó ganar 30% menos sin seguro. Sientes rabia y miedo a la pobreza. No puedes competir contra quien vive hacinado para ahorrar. Sientes que el sistema te traicionó y te empuja a la pobreza.", p:"No es xenofobia, es supervivencia. No puedo competir contra sueldos de hambre.", r:["(Causa-Efecto): ¿Cómo afecta el aumento repentino de la oferta de mano de obra en los niveles salariales locales?", "(Qué): ¿Qué es el costo de vida en Monterrey comparado con el sur del país o Centroamérica?", "(Quién): ¿Quién debe proteger al trabajador nacional frente a la contratación de extranjeros en condiciones inferiores?", "(Cómo): ¿Cómo se manifiesta la precarización laboral cuando se eliminan prestaciones de ley?", "(Dónde): ¿En qué sectores económicos es más evidente el desplazamiento de trabajadores locales?", "(Cuándo): ¿Cuándo se considera que existe una saturación del mercado laboral en un sector específico?"], k:["Protección Empleo", "Poder Adquisitivo", "Competencia Desleal", "Costo Vida", "Desplazamiento"] },
+                    { t:"El Trabajador Migrante", type:"Migrante", m:"Derecho a trabajar.", s:"Dejaste tu hogar por necesidad o peligro. Tu familia depende de tus envíos. Llegaste y encontraste puertas cerradas. Cuando te dieron trabajo, no preguntaste condiciones, solo querías empezar. Haces lo que nadie quiere y lo haces bien. Te duele que te acusen de robar empleos. Te ganas cada centavo. Tu esfuerzo construye esta ciudad.", p:"El hambre no espera papeles. Tengo derecho a trabajar y aporto mi esfuerzo.", r:["(Qué): ¿Es el trabajo un derecho humano universal según la Declaración Universal de los DDHH?", "(Cuánto): ¿Cuál es la contribución estimada de los trabajadores migrantes al Producto Interno Bruto (PIB) de los países receptores?", "(Causa-Efecto): ¿Cómo benefician las remesas a las economías de los países de origen y cómo impacta el consumo del migrante en el país de destino?", "(Quién): ¿Quiénes suelen ocupar los puestos de trabajo '3D' (Dificiles, Sucios y Peligrosos - Dirty, Dangerous, Difficult)?", "(Cómo): ¿Cómo la ética de trabajo y la disponibilidad del migrante cubren huecos en el mercado laboral?", "(Dónde): ¿En qué industrias de Nuevo León es vital la mano de obra foránea para mantener la operación?"], k:["Derecho Trabajo", "Productividad", "Remesas", "Subsistencia", "Aporte PIB"] },
+                    { t:"El Dueño Constructora", type:"Empresa", m:"Eficiencia manda.", s:"Luchas en un mercado feroz. Los márgenes son mínimos. Enfrentas ausentismo local. Encuentras migrantes puntuales y dispuestos. No es caridad ni maldad, es negocios. Contratas al que da resultados para entregar a tiempo. La eficiencia es la única forma de sobrevivir.", p:"Yo contrato a quien quiera trabajar. La productividad no tiene nacionalidad.", r:["(Qué): ¿Qué factores determinan la competitividad de una empresa constructora?", "(Cómo): ¿Cómo afecta el ausentismo laboral a los costos y tiempos de entrega de una obra?", "(Causa-Efecto): ¿Si aumentan los costos laborales, cómo repercute esto en el precio final de la vivienda para el consumidor?", "(Quién): ¿Quién tiene la libertad legal de decidir a quién contratar en una empresa privada?", "(Dónde): ¿En qué regiones de México existe escasez de mano de obra para el sector de la construcción?", "(Cuánto): ¿Cuánto se ahorra una empresa en tiempos de ejecución al tener una plantilla laboral estable y comprometida?"], k:["Eficiencia", "Libre Mercado", "Productividad", "Costos", "Competitividad"] },
+                    { t:"El Abogado Laboral", type:"Legal", m:"La ley es pareja.", s:"Defiendes el Estado de Derecho. Ves empleadores abusando de migrantes: sin seguro, bajos salarios, amenazas. Tu postura es técnica: permitir esto corrompe el sistema. Si se paga menos a uno, se pagará menos a todos. La ley laboral es territorial y protege a todo humano en suelo mexicano.", p:"La ley no tiene fronteras: a trabajo igual, salario igual. Explotar a uno nos condena a todos.", r:["(Qué): ¿Qué establecen los artículos constitucionales sobre la igualdad en el trabajo?", "(Quién): ¿Quién tiene la obligación de verificar que las empresas cumplan con la normativa laboral (STPS)?", "(Causa-Efecto): ¿Qué consecuencias legales enfrenta un patrón que contrata migrantes irregulares para evadir impuestos?", "(Cómo): ¿Cómo beneficia a la economía formal que todos los trabajadores, incluidos migrantes, estén regularizados?", "(Cuándo): ¿En qué momentos históricos la regularización de trabajadores ha mejorado las condiciones económicas de un país?", "(Dónde): ¿Dónde pueden los trabajadores migrantes denunciar abusos laborales sin temor a represalias migratorias?"], k:["Ley Federal Trabajo", "Derechos Irrenunciables", "No Discriminación", "Seguridad Social", "Legalidad"] },
+                    { t:"El Consumidor", type:"Local", m:"Cuidando el gasto.", s:"Haces malabares con el presupuesto. La inflación golpea. Necesitas un servicio y buscas opciones. Eliges la más económica, que resulta ser de migrantes. Es una decisión racional costo-beneficio. Te molesta que te juzguen. Tu prioridad es tu familia. Defiendes tu libertad de elegir en un mercado libre.", p:"Mi obligación es cuidar mi economía. Tengo derecho a elegir según mi presupuesto.", r:["(Qué): ¿Qué es la economía de libre mercado desde la perspectiva del consumidor final?", "(Cómo): ¿Cómo influye el precio de los servicios en la calidad de vida de las familias de clase media y baja?", "(Causa-Efecto): ¿Si se obliga a pagar precios más altos por servicios, cómo afecta esto al consumo de otros bienes básicos?", "(Quién): ¿Quiénes son los principales beneficiarios de la competencia de precios en el sector servicios?", "(Cuánto): ¿Cuánto ha aumentado el costo de la vida en Monterrey en el último año (inflación)?", "(Dónde): ¿En qué tipo de servicios domésticos es más común la contratación informal por precio?"], k:["Economía Familiar", "Libre Elección", "Poder Adquisitivo", "Inflación", "Racionalidad"] },
+                    { t:"El Líder Sindical", type:"Gremio", m:"Unidad obrera.", s:"Luchas por derechos. Sabes que la historia obrera es de unidad. Te preocupa que usen a migrantes para dividir y bajar sueldos. Tu visión es estratégica: si pelean por nacionalidad, pierden fuerza. Buscas unir a locales y migrantes. La única forma de proteger el salario es igualdad de derechos para todos.", p:"Divididos somos débiles. La solución no es expulsar, sino organizar para no ser explotados.", r:["(Qué): ¿Cuál es la función principal de un sindicato en la protección del salario?", "(Cómo): ¿Cómo afecta la existencia de una gran masa de trabajadores no sindicalizados a la capacidad de negociación colectiva?", "(Quién): ¿Quiénes son históricamente los más beneficiados cuando la clase trabajadora está dividida?", "(Causa-Efecto): ¿Si se regulariza y sindicaliza a los migrantes, qué sucede con el nivel general de salarios?", "(Dónde): ¿En qué países los sindicatos han integrado exitosamente a trabajadores migrantes para fortalecer sus demandas?", "(Cuándo): ¿Cuándo es legalmente posible afiliar a un trabajador extranjero a un sindicato mexicano?"], k:["Solidaridad", "Contrato Colectivo", "Derechos Colectivos", "Unidad", "Negociación"] },
+                    { t:"El Emprendedor Informal", type:"Local", m:"Mi esquina se respeta.", s:"Tu oficina es la banqueta. Peleaste años por tu lugar, pagas cuotas y aguantas clima. Tienes códigos con compañeros. Llegan vendedores nuevos, migrantes, se ponen donde quieren. Sientes invasión y desorden. No es racismo, es defensa comercial. Temes saturación y problemas con autoridad.", p:"El sol sale para todos, pero con orden. Defiendo mi antigüedad y las reglas.", r:["(Qué): ¿Qué es el comercio informal y qué porcentaje de la economía mexicana representa?", "(Cómo): ¿Cómo se regulan socialmente los espacios de venta en la vía pública entre los propios comerciantes?", "(Quién): ¿Quién es la autoridad encargada de otorgar permisos de comercio en vía pública y bajo qué criterios?", "(Causa-Efecto): ¿Qué conflictos sociales surgen por la saturación de vendedores en espacios públicos limitados?", "(Dónde): ¿En qué zonas de la ciudad es más crítica la disputa por espacios de venta?", "(Cuándo): ¿Cuándo se considera que la competencia en la vía pública se vuelve desleal o conflictiva?"], k:["Comercio Informal", "Derecho Piso", "Competencia", "Ordenamiento", "Subsistencia"] }
+                ]
+            },
+            5: {
+                title: "Identidad y Cultura", subtitle: "Asimilación vs Identidad", icon: "fa-language", color: "#b71c1c",
+                img: "https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?q=80&w=1470&auto=format&fit=crop",
+                intro: "Monterrey es pluricultural. Escuchamos lenguas indígenas en las calles. Sin embargo, persiste presión para 'regiomontanizarse'. En escuelas, niños esconden su lengua por vergüenza. Otros dicen que para tener éxito hay que olvidar el pasado. ¿Integrarse requiere borrar la identidad? ¿Es la diversidad un obstáculo o un tesoro? Esta mesa es sobre quiénes somos.",
+                onePager: {
+                    q: "¿Hablar una lengua indígena en Monterrey es orgullo cultural o desventaja laboral?",
+                    stats: [{v:"Diversidad", d:"Crecimiento de lenguas originarias."}, {v:"Racismo", d:"Presión para asimilarse."}, {v:"Art. 2", d:"Protección constitucional."}],
+                    dilemma: "Éxito Global VS Dignidad Cultural",
+                    mediator: "El Docente"
+                },
+                roles: [
+                    { t:"El Estudiante Indígena", type:"Vulnerable", m:"Mi lengua, mi raíz.", s:"Tu lengua materna es tu hogar. En la escuela, hablarla es peligroso; genera burlas. Te sientes partido en dos. Te duele que te digan que olvides quién eres para tener éxito. Te rebelas: tu cultura no es un obstáculo. Quieres ser moderno hablando tu lengua. Exiges un espacio donde no tengas que esconderte.", p:"Mi lengua no es atraso, es raíz. Exijo ser yo mismo sin miedo.", r:["(Qué): ¿Qué garantías ofrece la Ley General de Derechos Lingüísticos de los Pueblos Indígenas en México?", "(Dónde): ¿En qué espacios públicos es legal y válido hablar una lengua indígena?", "(Causa-Efecto): ¿Cómo afecta la prohibición de la lengua materna al desarrollo cognitivo y autoestima del estudiante?", "(Quién): ¿Quiénes son los responsables de promover la diversidad cultural en las escuelas?", "(Cómo): ¿Cómo enriquece a una sociedad moderna la preservación de lenguas originarias (bilingüismo)?", "(Cuándo): ¿Cuándo se celebra el Día Internacional de la Lengua Materna y cuál es su objetivo?"], k:["Derechos Lingüísticos", "Identidad", "Discriminación", "Pluriculturalidad", "Resistencia"] },
+                    { t:"El 'Bromista'", type:"Local", m:"Solo es carrilla.", s:"Valoras la cohesión. Te gusta que todos compartan códigos. Lo diferente te incomoda. Tus 'bromas' son presión para que se adapten rápido. Crees que la sociedad funciona mejor si es homogénea. 'Si vienes a MTY, haz lo que los regios'. Ves la diversidad como barrera.", p:"Para llevarnos bien, hay que entendernos. La adaptación es de quien llega.", r:["(Qué): ¿Qué es la asimilación cultural y en qué se diferencia de la integración multicultural?", "(Por qué): ¿Por qué los grupos sociales tienden naturalmente a rechazar lo diferente (psicología de grupos)?", "(Cómo): ¿Cómo facilita la comunicación el uso de un idioma y códigos culturales comunes?", "(Causa-Efecto): ¿Qué conflictos surgen en una comunidad cuando no existe una base cultural compartida?", "(Quién): ¿Quién define qué es lo 'normal' o aceptable en una cultura local?", "(Dónde): ¿En qué contextos históricos la asimilación forzada ha sido una política de estado?"], k:["Asimilación", "Cohesión", "Homogeneidad", "Integración", "Cultura Dominante"] },
+                    { t:"El Maestro de Historia", type:"Educador", m:"Memoria viva.", s:"Te duele perder saberes milenarios por 'modernidad'. Ves alumnos avergonzados de su herencia. Entiendes que la diversidad debe celebrarse. Tu misión es enseñar que las lenguas son formas vivas de ver el mundo. Luchas contra el utilitarismo. Una sociedad sin memoria está vacía.", p:"Cada lengua que muere apaga una visión del universo. Defiendo nuestra humanidad.", r:["(Qué): ¿Qué dice el Artículo 2 de la Constitución sobre la composición pluricultural de la nación mexicana?", "(Cuánto): ¿Cuántas lenguas indígenas se hablan en México y cuántas están en riesgo de desaparición?", "(Causa-Efecto): ¿Qué se pierde científicamente y culturalmente cuando una lengua se extingue?", "(Cómo): ¿Cómo contribuye la migración interna a la diversificación cultural de las grandes ciudades como Monterrey?", "(Quién): ¿Quiénes son los guardianes del patrimonio cultural y cómo podemos apoyarlos?", "(Dónde): ¿En qué regiones de México se concentra la mayor diversidad lingüística?"], k:["Patrimonio", "Pluriculturalidad", "Memoria", "Diversidad", "Cosmovisión"] },
+                    { t:"El Padre 'Globalizado'", type:"Local", m:"Mirando al futuro.", s:"Eres pragmático. El mercado exige inglés, código, mandarín. Te preocupa el futuro competitivo. Ves las tradiciones como distracción romántica. Priorizas supervivencia y éxito. La educación debe ser utilitaria, para empresas globales, no para museos. A veces hay que dejar lo tradicional para progresar.", p:"El mundo no espera. Necesitamos herramientas para el futuro, no anclas al pasado.", r:["(Qué): ¿Qué idiomas y habilidades son los más demandados por las empresas internacionales hoy en día?", "(Causa-Efecto): ¿Cómo influye el dominio del inglés en el nivel de ingresos de un profesionista en México?", "(Cómo): ¿Cómo funcionan los modelos educativos de países líderes en economía y tecnología?", "(Cuándo): ¿En qué momento se vuelve una desventaja no estar estandarizado culturalmente en los negocios?", "(Quién): ¿Quiénes tienen mejores oportunidades de movilidad social: los que conservan tradiciones o los que se adaptan al mercado global?", "(Dónde): ¿En qué sectores económicos se valora más la competencia global que la identidad local?"], k:["Globalización", "Competitividad", "Utilitarismo", "Capital Humano", "Siglo XXI"] },
+                    { t:"La Directora", type:"Autoridad", m:"Orden escolar.", s:"Tu responsabilidad es el orden. Tienes alumnos de todos lados. La diversidad de idiomas genera malentendidos. Tu enfoque es administrativo: necesitas un código común. Promueves el español como herramienta de gestión, no por rechazo. Te preocupa que se formen guetos inmanejables.", p:"Para convivir, necesitamos un idioma común. La unidad requiere reglas claras.", r:["(Qué): ¿Qué es una lengua vehicular y cuál es su función en sociedades multilingües?", "(Cómo): ¿Cómo se pueden gestionar los conflictos derivados de la falta de entendimiento lingüístico en una escuela?", "(Quién): ¿Quién tiene la autoridad para establecer las normas de convivencia dentro de un plantel educativo?", "(Causa-Efecto): ¿Si no hay un idioma común, cómo se afecta la transmisión de valores y reglas institucionales?", "(Dónde): ¿En qué países con múltiples lenguas oficiales existen políticas claras de lengua común para la administración?", "(Cuándo): ¿Cuándo la promoción de una lengua común se convierte en una violación a los derechos individuales?"], k:["Lengua Vehicular", "Gestión", "Convivencia", "Normas", "Cohesión"] },
+                    { t:"El Defensor de DDHH", type:"Legal", m:"Dignidad humana.", s:"La discriminación lingüística es violencia. Has visto negación de servicios por no hablar español. Tu misión es que la ley se cumpla. La Constitución protege el uso de la lengua propia. La comodidad de la mayoría no está por encima de los derechos. Eres la voz de la ley.", p:"Discriminar por lengua es delito. Nadie puede prohibirte hablar como tu madre te enseñó.", r:["(Qué): ¿Qué sanciones establece la ley para quien discrimine a una persona por su lengua o origen étnico?", "(Dónde): ¿En qué instancias se puede denunciar la discriminación lingüística en México (CONAPRED)?", "(Causa-Efecto): ¿Cómo la prohibición de lenguas originarias contribuye a la desigualdad y la pobreza estructural?", "(Quién): ¿Quiénes son los sujetos obligados a garantizar el respeto a los derechos lingüísticos (servidores públicos, maestros)?", "(Cómo): ¿Cómo se define el racismo lingüístico o glotofobia?", "(Cuándo): ¿Desde cuándo se reconocen constitucionalmente las lenguas indígenas como lenguas nacionales al igual que el español?"], k:["No Discriminación", "Derechos Culturales", "Legalidad", "Protección Minorías", "Dignidad"] },
+                    { t:"El Influencer Cultural", type:"Digital", m:"Orgullo visible.", s:"Vives en el mundo digital. Te fascina la estética indígena. La muestras al mundo y generas interés. Te critican por 'superficial', pero das visibilidad. Si no está en redes, no existe. Pones la cultura en el mapa. Crees que modernizar la tradición la hace sobrevivir.", p:"Lo que no se ve, se olvida. Hago que la cultura sea tendencia y orgullo.", r:["(Qué): ¿Qué es la apropiación cultural indebida y dónde está la línea con la apreciación o difusión?", "(Cómo): ¿Cómo pueden las redes sociales revitalizar el interés de los jóvenes en las tradiciones locales?", "(Quién): ¿Quiénes son los creadores de contenido indígena que están rompiendo estereotipos en TikTok o YouTube?", "(Causa-Efecto): ¿El uso de elementos culturales en la moda o medios masivos ayuda a la economía de los artesanos o solo los explota?", "(Dónde): ¿En qué plataformas digitales se está dando el mayor movimiento de orgullo cultural?", "(Cuándo): ¿Cuándo una representación cultural se vuelve un estereotipo dañino en los medios?"], k:["Visibilidad", "Apropiación Cultural", "Tendencias", "Hibridación", "Marketing"] }
+                ]
+            },
+            6: {
+                title: "Seguridad y Derechos", subtitle: "Prevención vs Acoso", icon: "fa-shield-halved", color: "#263238",
+                img: "https://images.unsplash.com/photo-1555431189-0fabf2667795?q=80&w=1374&auto=format&fit=crop",
+                intro: "El miedo es un motor político. Ante la inseguridad, se señala al 'foráneo'. Esto lleva al perfilamiento racial: detener a jóvenes por su apariencia. Vecinos exigen mano dura. ¿Se vale sacrificar derechos para dar sensación de seguridad? Es el debate entre miedo y justicia.",
+                onePager: {
+                    q: "¿Se justifica detener a personas por su apariencia para prevenir delitos?",
+                    stats: [{v:"Miedo", d:"Alta percepción de inseguridad."}, {v:"Perfilamiento", d:"Revisiones por apariencia."}, {v:"Refugio", d:"Criminalización."}],
+                    dilemma: "Orden Público VS Garantías Individuales",
+                    mediator: "El Docente"
+                },
+                roles: [
+                    { t:"El Vecino Asustado", type:"Local", m:"Mi familia primero.", s:"Tu hogar es tu santuario. La inseguridad rompió tu paz. Vives alerta. Conectas 'desconocido' con 'peligroso'. Exiges mano dura. Prefieres que revisen a inocentes a que escape un culpable. Sacrificas libertad de otros por tu control.", p:"Mi familia tiene derecho a vivir sin miedo. Prefiero exceso de vigilancia a impunidad.", r:["(Qué): ¿Qué es la 'Teoría de las Ventanas Rotas' en seguridad pública?", "(Cuánto): ¿Cómo afectan los índices delictivos a la plusvalía y calidad de vida de un barrio?", "(Quién): ¿Quién es responsable de garantizar la seguridad preventiva en las calles?", "(Cómo): ¿Cómo funcionan los comités de vecinos vigilantes y su relación con la policía?", "(Causa-Efecto): ¿Si se relaja la vigilancia, aumenta realmente la incidencia delictiva?"], k:["Seguridad Pública", "Prevención", "Percepción", "Control Social", "Paz"] },
+                    { t:"El Joven Migrante", type:"Vulnerable", m:"No soy sospechoso.", s:"Eres joven, moreno, vistes urbano. Para la policía eres sospechoso. Te detienen para 'verificar'. Nunca encuentran nada, pero la humillación queda. Vives en libertad condicional. Es racismo institucional. Te tratan como criminal por quién eres. Exiges seguridad sin acoso.", p:"Mi apariencia no es delito. Exijo seguridad sin ser tratado como enemigo.", r:["(Qué): ¿Qué es el perfilamiento racial y por qué es inconstitucional?", "(Dónde): ¿En qué artículo de la Constitución (Art. 11 y 16) se prohíben los actos de molestia sin fundamento?", "(Causa-Efecto): ¿Qué impacto psicológico y social tiene la criminalización constante en los jóvenes migrantes?", "(Quién): ¿Quién vigila a la policía para evitar abusos de poder (Asuntos Internos/DDHH)?", "(Cómo): ¿Cómo distinguen los protocolos internacionales entre prevención legítima y acoso discriminatorio?"], k:["Perfilamiento", "Presunción Inocencia", "Abuso Autoridad", "Libre Tránsito", "Criminalización"] },
+                    { t:"El Policía", type:"Autoridad", m:"Cumpliendo el deber.", s:"Estás bajo presión. Debes bajar delitos. Tu trabajo es peligroso. Tomas decisiones rápidas. Tu experiencia te dice qué perfiles son riesgosos. Defiendes revisiones para sacar armas. Te critican por hacer el trabajo sucio. Crees que es instinto y estadística.", p:"Protejo a la comunidad. Las revisiones son prevención necesaria.", r:["(Qué): ¿Cuáles son las facultades legales de la policía preventiva municipal y estatal?", "(Cómo): ¿Cómo se define la 'sospecha razonable' en los protocolos policiales?", "(Quién): ¿A quién responde la policía y cuáles son sus indicadores de desempeño?", "(Causa-Efecto): ¿Si se eliminan las revisiones preventivas, aumenta el riesgo de delitos violentos?", "(Dónde): ¿En qué zonas la policía concentra sus operativos y bajo qué criterios de inteligencia?", "(Cuándo): ¿Cuándo un ciudadano puede negarse a una revisión y qué consecuencias puede tener?"], k:["Orden Público", "Protocolos", "Prevención", "Facultades", "Uso Fuerza"] },
+                    { t:"El Refugiado", type:"Migrante", m:"Huyo del mal.", s:"Huiste por peligro de muerte. Eres sobreviviente. Buscas paz. Te confunden con criminales. Te duele que te vean con miedo. Vives en limbo legal. Tu lucha es superar el trauma y el estigma. Pides que vean tu necesidad de refugio, no una amenaza.", p:"Vengo huyendo de la violencia. Pido protección, no confusión con criminales.", r:["(Qué): ¿Cuál es la diferencia legal entre un migrante económico y un refugiado?", "(Quién): ¿Qué institución en México se encarga de procesar las solicitudes de refugio (COMAR) y con qué recursos cuenta?", "(Cómo): ¿Cómo protege el derecho internacional a las personas que huyen de conflictos o persecución?", "(Causa-Efecto): ¿Cómo afecta la tardanza en los trámites de refugio a la seguridad y estabilidad de los solicitantes?", "(Dónde): ¿De qué países provienen principalmente los solicitantes de refugio en Nuevo León y por qué?", "(Cuándo): ¿Cuándo se pierde la condición de refugiado según la ley?"], k:["Asilo", "Refugio", "Protección", "No Devolución", "Estigmatización"] },
+                    { t:"El Comerciante", type:"Local", m:"Paz para vender.", s:"Tu negocio está en zona de flujo. Estás atrapado. Quieres seguridad, pero la militarización espanta clientes. Los migrantes aglomerados incomodan. Quieres sobrevivir. Buscas orden sin zona de guerra. El miedo mata al comercio.", p:"Necesito seguridad, no estado de sitio. El desorden mata al comercio.", r:["(Cómo): ¿Cómo afecta la percepción de inseguridad o la presencia policial excesiva al flujo de clientes en un comercio?", "(Qué): ¿Qué es la 'recuperación de espacios públicos' y cómo beneficia al comercio local?", "(Causa-Efecto): ¿Qué impacto tiene la presencia de población migrante en tránsito en la dinámica comercial de una zona?", "(Quién): ¿Quién debe gestionar el orden en el espacio público para garantizar la convivencia entre comerciantes, vecinos y migrantes?", "(Dónde): ¿Qué ejemplos existen de zonas comerciales que han logrado integrar orden y seguridad sin violencia?", "(Cuánto): ¿Cuánto pierden los negocios locales cuando hay operativos de seguridad que cierran calles o generan tensión?"], k:["Economía Local", "Clima Negocios", "Convivencia", "Orden Público", "Impacto Económico"] },
+                    { t:"El Activista Legal", type:"Legal", m:"Estado de Derecho.", s:"Vigilas el poder. Recibes denuncias de abusos. El fin no justifica los medios. Te enfrentas con la Constitución. Si permitimos violar la ley contra 'ellos', la violarán contra 'nosotros'. La seguridad real respeta la dignidad.", p:"La seguridad no está sobre la Constitución. Policía que viola derechos es delincuente.", r:["(Qué): ¿Qué límites establece la Constitución a la actuación policial en los artículos 14, 16 y 21?", "(Quién): ¿Tiene la policía municipal facultades para solicitar documentos migratorios a una persona?", "(Cómo): ¿Cómo se debe documentar y denunciar un abuso de autoridad o detención arbitraria?", "(Causa-Efecto): ¿Qué sucede con la confianza ciudadana en las instituciones cuando la policía actúa fuera de la ley?", "(Dónde): ¿Dónde están los contrapesos legales que impiden que la 'prevención' se convierta en represión?", "(Cuándo): ¿En qué casos está justificado el uso de la fuerza pública y bajo qué principios (necesidad, proporcionalidad)?"], k:["Estado Derecho", "Garantías", "Debido Proceso", "Abuso Autoridad", "Constitucionalidad"] },
+                    { t:"El Periodista Local", type:"Medios", m:"La verdad cruda.", s:"Cuentas lo que pasa. El miedo vende titulares. 'Invasión' vende. Te debates entre informar la realidad y no estigmatizar. Defiendes la libertad de expresión y la verdad incómoda. La sociedad debe saber.", p:"Mi trabajo es mostrar la realidad. La sociedad tiene derecho a saber.", r:["(Cómo): ¿Cómo influye el lenguaje utilizado en las noticias en la percepción que la gente tiene de los migrantes?", "(Qué): ¿Cuál es la responsabilidad social de los medios de comunicación en contextos de crisis social?", "(Causa-Efecto): ¿Existe una correlación real entre la cobertura mediática de delitos y los índices reales de criminalidad?", "(Quién): ¿Quiénes son las fuentes de información del periodista (policía, vecinos, víctimas) y qué sesgos pueden tener?", "(Dónde): ¿En qué medios o plataformas se difunden más noticias falsas (fake news) sobre migración y seguridad?", "(Cuándo): ¿Cuándo se cruza la línea entre informar hechos y generar pánico o incitar al odio?"], k:["Libertad Prensa", "Ética", "Estigmatización", "Derecho Información", "Opinión Pública"] }
+                ]
+            }
+        };
+
+        /* --- CONTROLADORES DE VISTA --- */
+        function navigateTo(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => {
+                el.classList.remove('active');
+                setTimeout(() => { 
+                    if(!el.classList.contains('active')) el.style.display = 'none'; 
+                }, 400);
+            });
+            
+            const target = document.getElementById(viewId);
+            target.style.display = 'block';
+            // Pequeño delay para permitir que el display:block renderice antes de la opacidad
+            setTimeout(() => target.classList.add('active'), 20);
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        let currentMesa = null;
+
+        function initApp() {
+            const grid = document.getElementById('mesas-grid');
+            
+            Object.keys(forumData).forEach(id => {
+                const m = forumData[id];
+                const card = document.createElement('div');
+                card.className = "bg-white p-8 rounded-2xl shadow-lg border border-gray-100 card-hover cursor-pointer relative overflow-hidden group";
+                card.onclick = () => openMesa(id);
+                
+                card.innerHTML = `
+                    <div class="absolute top-0 left-0 w-full h-1" style="background-color: ${m.color}"></div>
+                    <div class="absolute -right-6 -top-6 text-9xl opacity-5 group-hover:opacity-10 transition-opacity duration-500 text-gray-800 rotate-12">
+                        <i class="fa-solid ${m.icon}"></i>
+                    </div>
+                    
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="bg-gray-50 text-gray-500 px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest border border-gray-100">Mesa 0${id}</span>
+                            <i class="fa-solid ${m.icon} text-2xl" style="color: ${m.color}"></i>
+                        </div>
+                        
+                        <h3 class="text-xl font-bold text-gray-800 mb-1 group-hover:text-[${m.color}] transition-colors leading-tight">${m.title}</h3>
+                        <p class="text-sm text-gray-400 font-serif italic mb-6">${m.subtitle}</p>
+                        
+                        <div class="flex items-center text-xs font-bold uppercase tracking-wide text-gray-400 group-hover:text-[#002f6c] transition">
+                            Entrar al Debate <i class="fa-solid fa-arrow-right ml-2 transform group-hover:translate-x-1 transition"></i>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function openMesa(id) {
+            currentMesa = forumData[id];
+            
+            // Configurar Header
+            const header = document.getElementById('mesa-header');
+            header.style.backgroundImage = `url('${currentMesa.img}')`;
+            
+            document.getElementById('mesa-title').innerText = currentMesa.title;
+            document.getElementById('mesa-subtitle').innerText = currentMesa.subtitle;
+            document.getElementById('mesa-intro-text').innerHTML = currentMesa.intro;
+
+            // Configurar One Pager
+            const op = currentMesa.onePager;
+            const container = document.getElementById('one-pager-container');
+            const qBox = document.getElementById('op-question-box');
+            
+            qBox.style.borderColor = currentMesa.color;
+            document.getElementById('op-question').innerText = `"${op.q}"`;
+            
+            // Stats
+            document.getElementById('op-stats').innerHTML = op.stats.map(s => `
+                <div class="flex justify-between items-center border-b border-dashed border-gray-200 pb-2 last:border-0">
+                    <span class="text-xs text-gray-500 w-2/3">${s.d}</span>
+                    <span class="text-sm font-bold text-[#002f6c]">${s.v}</span>
+                </div>`).join('');
+            
+            document.getElementById('op-mediator').innerText = op.mediator;
+            document.getElementById('op-dilemma').innerText = op.dilemma;
+            document.getElementById('op-dilemma').style.color = currentMesa.color;
+
+            navigateTo('mesa-detail');
+        }
+
+        function showRolesGallery() {
+            const grid = document.getElementById('roles-grid');
+            grid.innerHTML = '';
+            
+            currentMesa.roles.forEach((role, idx) => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-6 rounded-xl shadow-md border-b-4 card-hover cursor-pointer relative group flex flex-col h-full";
+                card.style.borderColor = currentMesa.color;
+                card.onclick = () => openModal(idx);
+
+                card.innerHTML = `
+                    <div class="absolute top-4 right-4 text-2xl opacity-5 group-hover:opacity-20 transition"><i class="fa-solid fa-folder-open"></i></div>
+                    
+                    <span class="text-[9px] font-bold uppercase tracking-widest text-gray-400 mb-2 block">${role.type}</span>
+                    <h3 class="text-lg font-bold text-gray-800 mb-2 leading-tight group-hover:text-[#d4af37] transition-colors">${role.t}</h3>
+                    
+                    <div class="mt-auto pt-4 border-t border-gray-100">
+                        <p class="text-xs text-gray-500 italic mb-3 line-clamp-2">"${role.m}"</p>
+                        <div class="text-right">
+                            <span class="text-[10px] font-bold uppercase bg-gray-50 px-2 py-1 rounded text-gray-600 group-hover:bg-[#002f6c] group-hover:text-white transition">Ver Expediente</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            navigateTo('roles-gallery');
+        }
+
+        function backToMesa() { navigateTo('mesa-detail'); }
+
+        /* --- LOGICA MODAL --- */
+        function openModal(idx) {
+            document.body.style.overflow = 'hidden'; // Bloquear scroll body
+            const r = currentMesa.roles[idx];
+            
+            // Llenar datos
+            document.getElementById('m-role-type').innerText = r.type;
+            document.getElementById('m-role-type').style.backgroundColor = currentMesa.color;
+            
+            document.getElementById('m-role-title').innerText = r.t;
+            document.getElementById('m-role-postura').innerText = `"${r.p}"`;
+            
+            // Formatear Historia con saltos de línea
+            document.getElementById('m-role-story').innerHTML = r.s.replace(/\n/g, '<br><br>');
+            
+            // Arsenal
+            document.getElementById('m-role-research').innerHTML = r.r.map(item => `
+                <li class="flex items-start bg-gray-50 p-3 rounded-lg border border-gray-100">
+                    <span class="text-[#d4af37] mr-3 mt-1 flex-shrink-0"><i class="fa-solid fa-check"></i></span> 
+                    <span class="text-sm text-gray-600">${item}</span>
+                </li>
+            `).join('');
+
+            // Keywords
+            document.getElementById('m-role-keywords').innerHTML = r.k.map(k => `
+                <span class="bg-white text-gray-600 px-3 py-1 rounded-full text-xs font-bold border border-gray-200 shadow-sm">#${k}</span>
+            `).join('');
+
+            // Mostrar
+            const modal = document.getElementById('role-modal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('open'), 10);
+        }
+
+        function closeModal() {
+            document.body.style.overflow = 'auto'; // Restaurar scroll
+            const modal = document.getElementById('role-modal');
+            modal.classList.remove('open');
+            setTimeout(() => { modal.style.display = 'none'; }, 300);
+        }
+
+        function printModal() {
+            window.print();
+        }
+
+        // Cerrar modal con tecla ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                closeModal();
+            }
+        });
+
+        // Inicializar
+        initApp();
+    </script>
+</body>
+</html>
